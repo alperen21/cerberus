@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cerberus</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="logo">
+        <img src="icons/icon48.png" alt="Cerberus" class="logo-icon">
+        <h1>Cerberus</h1>
+      </div>
+      <div class="status-indicator" id="statusIndicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Protected</span>
+      </div>
+    </header>
+
+    <!-- Current Site Info -->
+    <section class="current-site" id="currentSiteSection">
+      <h2>Current Site</h2>
+      <div class="site-info">
+        <div class="site-domain" id="siteDomain">Loading...</div>
+        <div class="site-status" id="siteStatus">
+          <span class="status-badge" id="siteStatusBadge">Checking...</span>
+        </div>
+      </div>
+      <div class="site-actions" id="siteActions" style="display: none;">
+        <button class="btn btn-sm btn-outline" id="addToWhitelistBtn">Add to Trusted</button>
+        <button class="btn btn-sm btn-outline" id="removeFromWhitelistBtn" style="display: none;">Remove from Trusted</button>
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="quick-actions">
+      <div class="action-grid">
+        <button class="action-btn" id="whitelistManagementBtn">
+          <span class="action-icon">🛡️</span>
+          <span class="action-text">Manage Whitelist</span>
+        </button>
+        <button class="action-btn" id="settingsBtn">
+          <span class="action-icon">⚙️</span>
+          <span class="action-text">Settings</span>
+        </button>
+        <button class="action-btn" id="statsBtn">
+          <span class="action-icon">📊</span>
+          <span class="action-text">Statistics</span>
+        </button>
+        <button class="action-btn" id="helpBtn">
+          <span class="action-icon">❓</span>
+          <span class="action-text">Help</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Whitelist Management Panel (Hidden by default) -->
+    <section class="whitelist-panel" id="whitelistPanel" style="display: none;">
+      <div class="panel-header">
+        <h2>Whitelist Management</h2>
+        <button class="btn-close" id="closeWhitelistPanel">×</button>
+      </div>
+
+      <!-- Add Domain Form -->
+      <div class="add-domain-form">
+        <h3>Add Trusted Domain</h3>
+        <div class="form-group">
+          <input
+            type="text"
+            id="newDomainInput"
+            placeholder="Enter domain (e.g., example.com)"
+            class="form-input"
+          >
+          <button class="btn btn-primary" id="addDomainBtn">Add Domain</button>
+        </div>
+      </div>
+
+      <!-- Domain Lists -->
+      <div class="domain-lists">
+        <!-- User Domains -->
+        <div class="domain-list">
+          <h3>Your Trusted Domains <span class="count" id="userDomainsCount">0</span></h3>
+          <div class="domain-items" id="userDomainsList">
+            <div class="empty-state">No trusted domains added yet</div>
+          </div>
+        </div>
+
+        <!-- Dynamic Whitelist Preview -->
+        <div class="domain-list">
+          <h3>High-Reputation Domains <span class="count" id="dynamicDomainsCount">0</span></h3>
+          <div class="domain-items" id="dynamicDomainsList">
+            <div class="empty-state">Configure CrUX API to enable</div>
+          </div>
+          <button class="btn btn-sm btn-outline" id="refreshDynamicBtn">Refresh</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings Panel (Hidden by default) -->
+    <section class="settings-panel" id="settingsPanel" style="display: none;">
+      <div class="panel-header">
+        <h2>Settings</h2>
+        <button class="btn-close" id="closeSettingsPanel">×</button>
+      </div>
+
+      <!-- CrUX API Configuration -->
+      <div class="settings-group">
+        <h3>Google CrUX API Configuration</h3>
+        <p class="settings-description">
+          Configure your Google Cloud API key to enable dynamic whitelist updates based on site performance metrics.
+        </p>
+        <div class="form-group">
+          <label for="cruxApiKeyInput">API Key:</label>
+          <input
+            type="password"
+            id="cruxApiKeyInput"
+            placeholder="Enter your Google Cloud API key"
+            class="form-input"
+          >
+          <div class="form-actions">
+            <button class="btn btn-primary" id="saveCruxApiBtn">Save</button>
+            <button class="btn btn-outline" id="testCruxApiBtn">Test</button>
+          </div>
+        </div>
+        <div class="api-status" id="cruxApiStatus"></div>
+      </div>
+
+      <!-- Whitelist Settings -->
+      <div class="settings-group">
+        <h3>Whitelist Settings</h3>
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enableDynamicWhitelist" checked>
+            <span class="checkmark"></span>
+            Enable dynamic whitelist updates
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enableSubdomainMatching" checked>
+            <span class="checkmark"></span>
+            Trust subdomains of whitelisted domains
+          </label>
+        </div>
+      </div>
+
+      <!-- Export/Import -->
+      <div class="settings-group">
+        <h3>Backup & Restore</h3>
+        <div class="form-actions">
+          <button class="btn btn-outline" id="exportWhitelistBtn">Export Whitelist</button>
+          <button class="btn btn-outline" id="importWhitelistBtn">Import Whitelist</button>
+        </div>
+        <input type="file" id="importFileInput" accept=".json" style="display: none;">
+      </div>
+    </section>
+
+    <!-- Statistics Panel (Hidden by default) -->
+    <section class="stats-panel" id="statsPanel" style="display: none;">
+      <div class="panel-header">
+        <h2>Protection Statistics</h2>
+        <button class="btn-close" id="closeStatsPanel">×</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalDomainsChecked">-</div>
+          <div class="stat-label">Domains Checked</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="whitelistedDomains">-</div>
+          <div class="stat-label">Trusted Domains</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgResponseTime">-</div>
+          <div class="stat-label">Avg Response Time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="lastUpdate">-</div>
+          <div class="stat-label">Last CrUX Update</div>
+        </div>
+      </div>
+
+      <div class="whitelist-breakdown">
+        <h3>Whitelist Breakdown</h3>
+        <div class="breakdown-item">
+          <span class="breakdown-label">Global Trusted:</span>
+          <span class="breakdown-value" id="globalTrustedCount">-</span>
+        </div>
+        <div class="breakdown-item">
+          <span class="breakdown-label">User Added:</span>
+          <span class="breakdown-value" id="userAddedCount">-</span>
+        </div>
+        <div class="breakdown-item">
+          <span class="breakdown-label">Dynamic (CrUX):</span>
+          <span class="breakdown-value" id="dynamicCount">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="popup-footer">
+      <div class="version">v1.0.0</div>
+      <div class="links">
+        <a href="#" id="reportIssueLink">Report Issue</a>
+        <a href="#" id="privacyPolicyLink">Privacy</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="src/whitelist-manager.js"></script>
+  <script src="src/crux-integration.js"></script>
+  <script src="scripts/popup.js"></script>
+</body>
+</html>

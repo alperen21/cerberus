@@ -3,7 +3,7 @@ from codeop import Compile
 import re
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import N
-from agentic.__base import Agent 
+from agentic.__base import Agent
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import StateGraph, END, START
 from typing import TypedDict, Annotated, Sequence, List
@@ -12,6 +12,8 @@ from langchain_core.messages import BaseMessage, ToolMessage, AIMessage, SystemM
 from PIL import Image
 import asyncio
 import copy
+from concurrent.futures import ThreadPoolExecutor
+import threading
 from langchain_google_genai import ChatGoogleGenerativeAI
 from filter.whitelist import Whitelist
 from filter.blacklist import Blacklist
@@ -201,8 +203,8 @@ class CerberusAgent(Agent):
         
         def identify_brand(state, llm) -> str:
             screenshot = state["b64_screenshot"]
-            
-            system_message = SystemMessage(content=self.load_prompt("domain_matching_prompt"))
+
+            system_message = SystemMessage(content=self.load_prompt("brand_identification_prompt"))
 
             human_message = HumanMessage(content=[
                 {"type": "text", "text": "Identify the brand present in this screenshot."},
@@ -243,20 +245,41 @@ class CerberusAgent(Agent):
             state["label"] = "benign" if response.get("BrandMatch") else "phishing"
             return state 
 
-        def identify_brand_client_side(state : CerberusState) -> CerberusState: 
-            return identify_brand(state, ChatOllama(model="gemma3:4b"))
+        def identify_brand_client_side(state : CerberusState) -> CerberusState:
+            # Original: ChatOllama(model="gemma3:4b")
+            # Using llama3.2 which is already installed with temperature=0 for deterministic results
+            return identify_brand(state, ChatOllama(model="llama3.2:latest", temperature=0))
 
-        def identify_brand_server_side(state : CerberusState) -> CerberusState: 
-            return identify_brand(state, ChatGoogleGenerativeAI(model="gemini-2.5-flash"))
+        def identify_brand_server_side(state : CerberusState) -> CerberusState:
+            # Original: ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+            # Using gemini-2.0-flash-exp which is available with temperature=0 for deterministic results
+            return identify_brand(state, ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=0))
 
         def check_domain_client_side(state : CerberusState) -> CerberusState:
-            return check_brand_match(state, ChatOllama(model="gemma3:270m"))
-        
+            # Original: ChatOllama(model="gemma3:270m")
+            # Using llama3.2 which is already installed with temperature=0 for deterministic results
+            return check_brand_match(state, ChatOllama(model="llama3.2:latest", temperature=0))
+
         def check_domain_server_side(state : CerberusState) -> CerberusState:
-            return check_brand_match(state, ChatGoogleGenerativeAI(model="gemini-2.5-flash"))
+            # Original: ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+            # Using gemini-2.0-flash-exp which is available with temperature=0 for deterministic results
+            return check_brand_match(state, ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=0))
         
         def race_identify_check_and_logo(state: CerberusState) -> CerberusState:
-            return asyncio.run(race_identify_check_and_logo_async(state))
+            # Run async code in a separate thread to avoid event loop conflicts
+            def run_in_new_loop():
+                # Create a new event loop for this thread
+                new_loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(new_loop)
+                try:
+                    return new_loop.run_until_complete(race_identify_check_and_logo_async(state))
+                finally:
+                    new_loop.close()
+
+            # Execute in a thread pool
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(run_in_new_loop)
+                return future.result()
             
         async def race_identify_check_and_logo_async(state: CerberusState) -> CerberusState:
             s_client = copy.deepcopy(state)

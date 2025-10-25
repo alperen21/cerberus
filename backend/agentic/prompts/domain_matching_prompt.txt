@@ -1,15 +1,36 @@
 Here are two strings that are brand names. One string is the ground-truth brand name and another is the prediction to compare to the ground-truth.
 Please answer if the prediction is practically pointing the same brand or belonging to the same company or the service/platform owned or serviced by the same company to the ground-truth brand name.
 The predictions including "Error Occurred", "Unknown", or "nan" MUST return "False"
-You need to consider the language difference, abberibation, contatenation of multiple languages, domain name, URL, and typos as the same brand. You have to translate the non-English names to English.
+
+IMPORTANT PHISHING DETECTION RULES:
+1. DO NOT accept typos, misspellings, or character substitutions (e.g., "gogle" vs "google", "micros0ft" vs "microsoft")
+2. DO NOT accept homoglyphs or visually similar characters (e.g., "gооgle" with Cyrillic о vs "google")
+3. DO NOT accept missing or extra characters unless it's a known abbreviation
+4. BE STRICT about exact spelling when the domain does not match the identified brand
+
+You MAY consider as the same brand:
+- Language differences and translations (e.g., English vs Chinese names)
+- Known abbreviations (e.g., "MS" for "Microsoft", but only if commonly used)
+- Concatenation of domain parts (e.g., "gmailcom" vs "gmail.com", "googlecom" vs "google.com")
+- URLs with domain suffixes (e.g., "gmail.com" vs "gmail")
+- Non-English languages written in Alphabet if phonetically identical
+
 A prediction may have a sentence to warn a phishing or impersonated site for a specific brand. If the impersonated brand in the sentence is practically same to the given brand name, then consider it as the same brand too.
-You also need to consider the non-English languages written in Alphabet. If they are eventually the same, then answer True, otherwise False.
 Your response is expected to be boolean, <True/False>.
-For example, X, X.com and Twitter are belonging to the same company. Facebook and Meta belong to the same company.
-gmail, gmail.com, gmailcom, google, googlecom are all belonging to the same company.
-Office365, Microsoft, OneDrive, and Outlook365 all belong to the same company. So, in this and similar cases, you have to answer True.
-뽐뿌 and Ppomppu are actually the same brand as their sounds are the same. 
-最美天气, zuimeitianqi, zuimeiweather are the same brand since Tianqi means Weather in Chinese.
+
+SAFE EXAMPLES (return True):
+- X, X.com and Twitter are belonging to the same company. Facebook and Meta belong to the same company.
+- gmail, gmail.com, gmailcom, google, googlecom are all belonging to the same company.
+- Office365, Microsoft, OneDrive, and Outlook365 all belong to the same company.
+- 뽐뿌 and Ppomppu are actually the same brand as their sounds are the same.
+- 最美天气, zuimeitianqi, zuimeiweather are the same brand since Tianqi means Weather in Chinese.
+
+PHISHING EXAMPLES (return False):
+- "gogle" vs "google" (typo/misspelling)
+- "micros0ft" vs "microsoft" (character substitution)
+- "paypa1" vs "paypal" (character substitution)
+- "appleinc" vs "apple" (extra text that's not domain-related)
+- Any spelling that differs by more than domain suffixes (.com, .org, etc.)
 
 Return your response in the following format, and replace everything in < > with your answer:
 1. BrandMatch: <True/False>
