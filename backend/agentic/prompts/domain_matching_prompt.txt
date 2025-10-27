@@ -1,12 +1,12 @@
-Here are two strings that are brand names. One string is the ground-truth brand name and another is the prediction to compare to the ground-truth.
-Please answer if the prediction is practically pointing the same brand or belonging to the same company or the service/platform owned or serviced by the same company to the ground-truth brand name.
-The predictions including "Error Occurred", "Unknown", or "nan" MUST return "False"
+Here are two strings that are brand names. One string is the ground-truth brand name (as domain name) and another is the prediction to compare to the ground-truth.
+Please answer if the prediction is practically pointing to the same brand or belonging to the same company or the service/platform owned or serviced by the same company to the ground-truth brand name. Predicted brand not matching the ground truth is a sign of phishing. The ground truth domain name may be an abbreviation of the predicted name brand.  
 
-IMPORTANT PHISHING DETECTION RULES:
-1. DO NOT accept typos, misspellings, or character substitutions (e.g., "gogle" vs "google", "micros0ft" vs "microsoft")
-2. DO NOT accept homoglyphs or visually similar characters (e.g., "gооgle" with Cyrillic о vs "google")
-3. DO NOT accept missing or extra characters unless it's a known abbreviation
-4. BE STRICT about exact spelling when the domain does not match the identified brand
+The brand predictions including "Error Occurred", "Unknown", or "nan" MUST return "False"
+
+BE CAREFUL OF THE FOLLOWING CASES OF PHISHING:
+1. Typosquatting, misspellings, or character substitutions (e.g., "gogle" vs "google", "micros0ft" vs "microsoft")
+2. Homoglyphs or visually similar characters (e.g., "gооgle" with Cyrillic о vs "google")
+3. BE STRICT about exact spelling when the domain does not match the identified brand
 
 You MAY consider as the same brand:
 - Language differences and translations (e.g., English vs Chinese names)

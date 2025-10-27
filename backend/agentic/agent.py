@@ -248,7 +248,7 @@ class CerberusAgent(Agent):
         def identify_brand_client_side(state : CerberusState) -> CerberusState:
             # Original: ChatOllama(model="gemma3:4b")
             # Using llama3.2 which is already installed with temperature=0 for deterministic results
-            return identify_brand(state, ChatOllama(model="llama3.2:latest", temperature=0))
+            return identify_brand(state, ChatOllama(model="gemma3:4b", temperature=0))
 
         def identify_brand_server_side(state : CerberusState) -> CerberusState:
             # Original: ChatGoogleGenerativeAI(model="gemini-2.5-flash")
@@ -258,7 +258,7 @@ class CerberusAgent(Agent):
         def check_domain_client_side(state : CerberusState) -> CerberusState:
             # Original: ChatOllama(model="gemma3:270m")
             # Using llama3.2 which is already installed with temperature=0 for deterministic results
-            return check_brand_match(state, ChatOllama(model="llama3.2:latest", temperature=0))
+            return check_brand_match(state, ChatOllama(model="gemma3:4b", temperature=0))
 
         def check_domain_server_side(state : CerberusState) -> CerberusState:
             # Original: ChatGoogleGenerativeAI(model="gemini-2.5-flash")

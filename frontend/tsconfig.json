@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "ES2020",
+    "moduleResolution": "bundler",
     "jsx": "react",
     "strict": true,
     "esModuleInterop": true,
@@ -17,7 +17,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "types": ["chrome"]
+    "types": ["chrome"],
+    "allowImportingTsExtensions": false
   },
   "include": [
     "src/**/*"

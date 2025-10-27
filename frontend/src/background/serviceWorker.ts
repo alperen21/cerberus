@@ -1,8 +1,8 @@
 // Background service worker for Cerberus extension
 // Handles screenshot capture and communication with backend
 
-import { analyzeScreenshot, dataURLToBase64 } from '../common/api';
-import { AnalysisRequest, BackendResponse, ExtensionMessage } from '../common/types';
+import { analyzeScreenshot, dataURLToBase64 } from '../common/api.js';
+import { AnalysisRequest, BackendResponse, ExtensionMessage } from '../common/types.js';
 
 // Listen for messages from content script
 chrome.runtime.onMessage.addListener((message: ExtensionMessage, sender, sendResponse) => {
@@ -22,6 +22,27 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, sender, sendRes
 });
 
 /**
+ * Check if a URL can be analyzed
+ */
+function isAnalyzableUrl(url: string): boolean {
+  if (!url) return false;
+
+  // Blocked URL patterns
+  const blockedPrefixes = [
+    'chrome://',
+    'chrome-extension://',
+    'edge://',
+    'about:',
+    'file://',
+    'view-source:',
+    'devtools://',
+    'brave://'
+  ];
+
+  return !blockedPrefixes.some(prefix => url.startsWith(prefix));
+}
+
+/**
  * Handle page analysis request
  */
 async function handleAnalyzePage(tabId: number | undefined): Promise<{ success: boolean; data?: BackendResponse; error?: string }> {
@@ -30,14 +51,21 @@ async function handleAnalyzePage(tabId: number | undefined): Promise<{ success: 
   }
 
   try {
+    // Get tab info first to check URL
+    const tab = await chrome.tabs.get(tabId);
+    const url = tab.url || '';
+
+    // Check if URL can be analyzed
+    if (!isAnalyzableUrl(url)) {
+      console.log('Skipping analysis for restricted URL:', url);
+      return { success: false, error: 'Cannot analyze this URL type' };
+    }
+
     // Step 1: Capture visible tab screenshot
     const screenshotDataUrl = await chrome.tabs.captureVisibleTab({
       format: 'png'
     });
 
-    // Get tab info
-    const tab = await chrome.tabs.get(tabId);
-    const url = tab.url || '';
     const domain = new URL(url).hostname;
 
     // Step 2: Convert to base64 (remove data URL prefix)
