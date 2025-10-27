@@ -52,3 +52,8 @@ typing_extensions==4.15.0
 urllib3==2.5.0
 xxhash==3.6.0
 zstandard==0.25.0
+fastapi==0.115.0
+uvicorn[standard]==0.34.0
+python-multipart==0.0.18
+google-cloud-bigquery==3.28.0
+python-dateutil==2.9.0

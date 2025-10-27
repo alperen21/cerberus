@@ -6,8 +6,6 @@ Examples of call-to-action elements: buttons or links that lead to asking for us
 Please adhere strictly to the following rules for your analysis:
 1. Do not interact with the webpage in a live environment or use browser functionalities.
 2. Avoid inspecting the webpage’s source code, the website’s address bar, SSL certificates, URLs, or any interactive features.
-3. Your analysis should be grounded solely on the information from the html script.
-4. No additional resources or external validations should be used.
 
 Take note that some pages may include information/logos of other brands, especially pages that use single sign-on features or pages created by website builder. It's important to look beyond these logos to accurately identify the brand or website the user intends to create.
 Some famous single sign-on operators include: Facebook, Google, Microsoft. 

@@ -1,0 +1,363 @@
+/* Cerberus Overlay Styles - Isolated via Shadow DOM */
+
+/* Container */
+.cerberus-overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2147483647;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Backdrop */
+.cerberus-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  pointer-events: all;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Main Panel */
+.cerberus-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  pointer-events: all;
+  animation: slideIn 0.3s ease;
+  border: 2px solid;
+}
+
+.cerberus-panel-blocking {
+  z-index: 2147483648;
+}
+
+.cerberus-panel-warning {
+  top: 20px;
+  left: 20px;
+  transform: none;
+  max-width: 400px;
+}
+
+/* Header */
+.cerberus-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid;
+  border-radius: 12px 12px 0 0;
+}
+
+.cerberus-verdict-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.cerberus-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Confidence Section */
+.cerberus-confidence-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cerberus-label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.cerberus-progress-container {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.cerberus-progress-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Reasons Section */
+.cerberus-reasons-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cerberus-section-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.cerberus-reasons-list {
+  margin: 0;
+  padding: 0 0 0 20px;
+  color: #374151;
+}
+
+.cerberus-reason-item {
+  margin-bottom: 8px;
+}
+
+.cerberus-reason-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Explanation Section */
+.cerberus-explanation-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cerberus-explanation-content {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* Actions Section */
+.cerberus-actions-section {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+}
+
+.cerberus-action-button {
+  flex: 1;
+  padding: 12px 24px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cerberus-action-button:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cerberus-action-button:active {
+  transform: translateY(0);
+}
+
+/* Close Button */
+.cerberus-close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: #f3f4f6;
+  color: #6b7280;
+  font-size: 24px;
+  line-height: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cerberus-close-button:hover {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+/* Top Badge */
+.cerberus-top-badge {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: all;
+  cursor: pointer;
+  animation: pulse 2s infinite;
+}
+
+/* Highlight Boxes */
+.cerberus-highlight-box {
+  position: absolute;
+  border: 2px solid #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  pointer-events: all;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: pulseHighlight 2s infinite;
+  z-index: 2147483646;
+}
+
+.cerberus-highlight-box:hover,
+.cerberus-highlight-hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-width: 3px;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+.cerberus-highlight-badge {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Magnifier */
+.cerberus-magnifier {
+  position: absolute;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 2147483649;
+  pointer-events: all;
+  animation: fadeIn 0.2s ease;
+}
+
+.cerberus-magnifier img {
+  display: block;
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseHighlight {
+  0%, 100% {
+    border-color: #ef4444;
+  }
+  50% {
+    border-color: #dc2626;
+  }
+}
+
+/* Outlined Elements (alternative to highlight boxes) */
+.cerberus-outlined-element {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+  animation: pulseOutline 2s infinite;
+}
+
+@keyframes pulseOutline {
+  0%, 100% {
+    outline-color: #ef4444;
+    outline-offset: 2px;
+  }
+  50% {
+    outline-color: #dc2626;
+    outline-offset: 4px;
+  }
+}
+
+/* Scrollbar Styling */
+.cerberus-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cerberus-panel::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 0 12px 12px 0;
+}
+
+.cerberus-panel::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.cerberus-panel::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .cerberus-panel {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .cerberus-panel-warning {
+    top: 0;
+    left: 0;
+    max-width: 100%;
+  }
+
+  .cerberus-actions-section {
+    flex-direction: column;
+  }
+}

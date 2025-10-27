@@ -137,7 +137,7 @@ class CruxAllowlistBuilder:
 
 class Whitelist(ControlList):
     def __init__(self):
-        self.builder = CruxAllowlistBuilder(cache_dir=".crux_cache", project_id="cerberus-475906", location=get_crux_location())
+        self.builder = CruxAllowlistBuilder(cache_dir=".crux_cache", project_id="cerberus-476114", location=get_crux_location())
         top_n = 100_000
         month = get_month()
 
