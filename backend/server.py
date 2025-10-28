@@ -253,10 +253,17 @@ async def analyze_screenshot(
         logger.info("   ↳ Preparing to invoke vision models...")
 
         llm_start = datetime.now()
-        result = cerberus_agent.invoke(
-            screenshot=request.screenshot_base64,
-            url=request.url
-        )
+        try:
+            result = cerberus_agent.invoke(
+                screenshot=request.screenshot_base64,
+                url=request.url
+            )
+        except Exception as agent_error:
+            logger.error(f"❌ [CERBERUS] Agent invocation failed: {str(agent_error)}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Agent analysis failed: {str(agent_error)}"
+            )
         llm_time = (datetime.now() - llm_start).total_seconds() * 1000
 
         logger.info(f"✅ [CERBERUS] LLM analysis completed in {llm_time:.2f}ms")
