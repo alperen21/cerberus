@@ -228,7 +228,7 @@ class CerberusAgent(Agent):
             system_message = SystemMessage(content=self.load_prompt("domain_matching_prompt"))
             human_message = f"""
             Here is the identified brand name: {state["identified_brand"]}
-            Here is the domain: {state["domain"]}
+            Here is the domain: {state["url"]}
 
             """
             human_message = HumanMessage(content=human_message)

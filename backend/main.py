@@ -29,8 +29,8 @@ def image_to_base64(image_path: str) -> str:
 
 def main():
     agent = CerberusAgent()
-    url = "https://www.googlee.com"
-    image = image_to_base64("exp.png")
+    url = "https://www.ddbs.com"
+    image = image_to_base64("dbs.png")
 
     response = agent.invoke(
         screenshot=image,
