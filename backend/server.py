@@ -10,6 +10,11 @@ import base64
 import logging
 from datetime import datetime
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from agentic.agent import CerberusAgent
 
@@ -67,6 +72,18 @@ class AnalysisRequest(BaseModel):
     user_event: Optional[str] = Field(None, description="User event that triggered analysis")
 
 
+class CheckUrlRequest(BaseModel):
+    url: str = Field(..., description="The URL to check")
+    domain: str = Field(..., description="The domain extracted from the URL")
+
+
+class CheckUrlResponse(BaseModel):
+    status: str  # 'safe', 'dangerous', 'needs_analysis'
+    reason: Optional[str] = None
+    in_whitelist: bool = False
+    in_blacklist: bool = False
+
+
 class Reason(BaseModel):
     code: str
     label: str
@@ -120,6 +137,75 @@ async def health_check():
     }
 
 
+@app.post("/api/check-url", response_model=CheckUrlResponse)
+async def check_url(
+    request: CheckUrlRequest,
+    x_client_id: Optional[str] = Header(None),
+    x_extension_version: Optional[str] = Header(None)
+):
+    """
+    Fast pre-check endpoint that only checks whitelist/blacklist
+
+    Returns:
+    - 'safe' if URL is in whitelist
+    - 'dangerous' if URL is in blacklist
+    - 'needs_analysis' if URL needs full LLM analysis
+    """
+    if cerberus_agent is None:
+        logger.error("Cerberus agent not initialized")
+        raise HTTPException(status_code=503, detail="Service unavailable - agent not initialized")
+
+    try:
+        logger.info(f"🔍 [CHECK-URL] Checking URL: {request.url}")
+        logger.info(f"🌐 [CHECK-URL] Domain: {request.domain}")
+
+        # Check global whitelist first
+        is_in_whitelist = cerberus_agent.whitelist.check(request.url)
+        if is_in_whitelist:
+            logger.info(f"✅ [CHECK-URL] URL is in global whitelist - SAFE")
+            return CheckUrlResponse(
+                status='safe',
+                reason='Domain found in global whitelist of trusted sites',
+                in_whitelist=True,
+                in_blacklist=False
+            )
+
+        # Check blacklist
+        is_in_blacklist = cerberus_agent.blacklist.check(request.url)
+        if is_in_blacklist:
+            logger.info(f"🚨 [CHECK-URL] URL is in blacklist - DANGEROUS")
+            return CheckUrlResponse(
+                status='dangerous',
+                reason='Domain found in blacklist of known malicious sites',
+                in_whitelist=False,
+                in_blacklist=True
+            )
+
+        # Check personal whitelist (cache)
+        is_in_personal_whitelist = cerberus_agent.personalWhitelist.check(request.url)
+        if is_in_personal_whitelist:
+            logger.info(f"✅ [CHECK-URL] URL is in personal whitelist - SAFE")
+            return CheckUrlResponse(
+                status='safe',
+                reason='Domain previously marked as safe by user',
+                in_whitelist=True,
+                in_blacklist=False
+            )
+
+        # URL needs full analysis
+        logger.info(f"🔬 [CHECK-URL] URL needs full analysis")
+        return CheckUrlResponse(
+            status='needs_analysis',
+            reason='URL not found in whitelist or blacklist, requires full analysis',
+            in_whitelist=False,
+            in_blacklist=False
+        )
+
+    except Exception as e:
+        logger.error(f"❌ [CHECK-URL] Error checking URL: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"URL check failed: {str(e)}")
+
+
 @app.post("/api/analyze", response_model=AnalysisResponse)
 async def analyze_screenshot(
     request: AnalysisRequest,
@@ -139,21 +225,41 @@ async def analyze_screenshot(
     start_time = datetime.now()
 
     try:
-        logger.info(f"Analyzing URL: {request.url} from client: {x_client_id}")
+        # Log request receipt
+        logger.info("=" * 80)
+        logger.info(f"📸 [CERBERUS] Received screenshot analysis request")
+        logger.info(f"🔗 URL: {request.url}")
+        logger.info(f"🌐 Domain: {request.domain}")
+        logger.info(f"👤 Client ID: {x_client_id}")
+        logger.info(f"📦 Extension Version: {x_extension_version}")
 
         # Validate base64 screenshot
         try:
             # Test decode to ensure valid base64
-            base64.b64decode(request.screenshot_base64)
+            decoded = base64.b64decode(request.screenshot_base64)
+            screenshot_size_kb = len(decoded) / 1024
+            logger.info(f"📊 Screenshot size: {screenshot_size_kb:.2f} KB")
+            if request.viewport_size:
+                logger.info(f"📐 Viewport: {request.viewport_size.width}x{request.viewport_size.height}")
+            else:
+                logger.info("📐 Viewport: Not provided")
         except Exception as e:
-            logger.error(f"Invalid base64 screenshot: {e}")
+            logger.error(f"❌ Invalid base64 screenshot: {e}")
             raise HTTPException(status_code=400, detail="Invalid base64 screenshot")
 
         # Invoke the Cerberus agent
+        logger.info("🤖 [CERBERUS] Starting LLM analysis...")
+        logger.info("   ↳ Running whitelist/blacklist checks...")
+        logger.info("   ↳ Preparing to invoke vision models...")
+
+        llm_start = datetime.now()
         result = cerberus_agent.invoke(
             screenshot=request.screenshot_base64,
             url=request.url
         )
+        llm_time = (datetime.now() - llm_start).total_seconds() * 1000
+
+        logger.info(f"✅ [CERBERUS] LLM analysis completed in {llm_time:.2f}ms")
 
         # Map agent result to API response
         verdict = map_label_to_verdict(result.get('label', 'unknown'))
@@ -230,14 +336,30 @@ async def analyze_screenshot(
             timestamp=datetime.now().isoformat()
         )
 
-        logger.info(f"Analysis complete: {verdict} (confidence: {confidence:.2f}) in {processing_time:.2f}ms")
+        # Log final results
+        logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        logger.info(f"🎯 [RESULT] Verdict: {verdict.upper()}")
+        logger.info(f"📊 [RESULT] Confidence: {confidence * 100:.1f}%")
+        logger.info(f"💡 [RESULT] Explanation: {explanation}")
+        logger.info(f"📋 [RESULT] Reasons count: {len(reasons)}")
+        for i, reason in enumerate(reasons, 1):
+            logger.info(f"   {i}. [{reason.code}] {reason.label}")
+        logger.info(f"⏱️  [RESULT] Total processing time: {processing_time:.2f}ms")
+        logger.info(f"   ↳ LLM time: {llm_time:.2f}ms")
+        logger.info(f"   ↳ Other processing: {(processing_time - llm_time):.2f}ms")
+        logger.info("=" * 80)
 
         return response
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error analyzing screenshot: {e}", exc_info=True)
+        error_time = (datetime.now() - start_time).total_seconds() * 1000
+        logger.error("=" * 80)
+        logger.error(f"❌ [ERROR] Analysis failed after {error_time:.2f}ms")
+        logger.error(f"❌ [ERROR] URL: {request.url}")
+        logger.error(f"❌ [ERROR] Exception: {str(e)}")
+        logger.error("=" * 80, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 
