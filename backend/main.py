@@ -29,7 +29,7 @@ def image_to_base64(image_path: str) -> str:
 
 def main():
     agent = CerberusAgent()
-    url = "https://www.ddbs.com"
+    url = "https://www.google.com"
     image = image_to_base64("dbs.png")
 
     response = agent.invoke(

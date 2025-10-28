@@ -20,6 +20,9 @@ from filter.blacklist import Blacklist
 from filter.personal_whitelist import PersonalWhitelist
 from langchain_ollama import ChatOllama
 from pathlib import Path
+from urllib.parse import urlparse
+import idna
+
 
 
 class CerberusState(TypedDict): #
@@ -60,23 +63,29 @@ class CerberusAgent(Agent):
 
 
     def invoke(self, screenshot: str, url: str) -> dict:
+        # derive domain from URL
+        host = urlparse(url).hostname or ""
+        try:
+            host = idna.encode(host).decode("ascii")  # punycode-safe
+        except Exception:
+            pass
+
         state = CerberusState(
-            messages = [],
-            label = None,
-            confidence = None,
-            reasons = None,
-            highlights = None,  
-            explanation_html = None,
-            suggested_actions = None,
-            domain = None,
-            identified_brand = None,
-            b64_screenshot = screenshot,
-            is_in_global_whitelist = None,
-            is_in_personal_whitelist = None, 
-            is_in_blacklist = None, 
-            url = url
+            messages=[],
+            label=None,
+            confidence=None,
+            reasons=None,
+            highlights=None,
+            explanation_html=None,
+            suggested_actions=None,
+            domain=host,                      # <-- IMPORTANT
+            identified_brand=None,
+            b64_screenshot=screenshot,
+            is_in_global_whitelist=None,
+            is_in_personal_whitelist=None,
+            is_in_blacklist=None,
+            url=url,
         )
-        
         return self.graph.invoke(state)
 
     def extract_info(self, text: str):
