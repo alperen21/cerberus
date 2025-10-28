@@ -24,6 +24,8 @@ export interface BackendResponse {
     explanation: string;
     explanation_html?: string;
     suggested_actions: SuggestedAction[];
+    processing_time_ms?: number;
+    timestamp?: string;
 }
 export interface SuggestedAction {
     action: 'leave' | 'report' | 'continue' | 'block';
@@ -40,6 +42,16 @@ export interface AnalysisRequest {
         height: number;
     };
     user_event?: string;
+}
+export interface CheckUrlRequest {
+    url: string;
+    domain: string;
+}
+export interface CheckUrlResponse {
+    status: 'safe' | 'dangerous' | 'needs_analysis';
+    reason?: string;
+    in_whitelist: boolean;
+    in_blacklist: boolean;
 }
 export interface ExtensionMessage {
     type: 'ANALYZE_PAGE' | 'ANALYSIS_RESULT' | 'SHOW_OVERLAY' | 'HIDE_OVERLAY' | 'USER_ACTION';

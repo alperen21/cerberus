@@ -1,9 +1,10 @@
 // API utilities for communicating with the backend
 
-import { AnalysisRequest, BackendResponse, ClientInfo } from './types';
+import { AnalysisRequest, BackendResponse, ClientInfo, CheckUrlRequest, CheckUrlResponse } from './types';
 
 const BACKEND_URL = 'http://localhost:8000';
 const API_ENDPOINT = `${BACKEND_URL}/api/analyze`;
+const CHECK_URL_ENDPOINT = `${BACKEND_URL}/api/check-url`;
 
 /**
  * Generate or retrieve client ID for rate limiting and telemetry
@@ -32,6 +33,38 @@ export async function getClientInfo(): Promise<ClientInfo> {
  */
 function generateClientId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Check URL against whitelist/blacklist before full analysis
+ */
+export async function checkUrl(
+  url: string,
+  domain: string
+): Promise<CheckUrlResponse> {
+  const clientInfo = await getClientInfo();
+
+  try {
+    const response = await fetch(CHECK_URL_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Client-ID': clientInfo.clientId,
+        'X-Extension-Version': clientInfo.extensionVersion
+      },
+      body: JSON.stringify({ url, domain })
+    });
+
+    if (!response.ok) {
+      throw new Error(`URL check failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data: CheckUrlResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error checking URL:', error);
+    throw error;
+  }
 }
 
 /**

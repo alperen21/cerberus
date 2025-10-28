@@ -24,15 +24,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * Handle analysis result from backend
  */
 function handleAnalysisResult(response) {
-    console.log('Received analysis result:', response);
     // Determine if we should show overlay based on verdict and confidence
     const shouldShowOverlay = shouldDisplayOverlay(response);
     if (shouldShowOverlay) {
         createOverlay(response);
-    }
-    else {
-        // Just show a passive indicator (handled by background badge)
-        console.log('Page is safe, no overlay needed');
     }
 }
 /**
@@ -55,11 +50,7 @@ function shouldDisplayOverlay(response) {
  * Trigger analysis manually (can be called from popup or keyboard shortcut)
  */
 export function triggerAnalysis() {
-    chrome.runtime.sendMessage({ type: 'ANALYZE_PAGE' }, (response) => {
-        if (response?.error) {
-            console.error('Analysis error:', response.error);
-        }
-    });
+    chrome.runtime.sendMessage({ type: 'ANALYZE_PAGE' });
 }
 // Auto-trigger analysis on page load (if enabled)
 window.addEventListener('load', () => {
@@ -72,5 +63,5 @@ window.addEventListener('load', () => {
         }
     });
 });
-console.log('Cerberus content script initialized');
+console.log('[Cerberus] Content script initialized');
 //# sourceMappingURL=contentScript.js.map
