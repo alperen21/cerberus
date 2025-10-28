@@ -32,6 +32,8 @@ PHISHING EXAMPLES (return False):
 - "appleinc" vs "apple" (extra text that's not domain-related)
 - Any spelling that differs by more than domain suffixes (.com, .org, etc.)
 
+make sure the the domain is legitimate for the brand
+
 Return your response in the following format, and replace everything in < > with your answer:
 1. BrandMatch: <True/False>
 2. Explanation: <response>
