@@ -294,20 +294,25 @@ class CerberusAgent(Agent):
             s_client = copy.deepcopy(state)
             s_server = copy.deepcopy(state)
 
+            # Wrap synchronous functions to run in thread pool
             async def client_pipeline():
-                sc = identify_brand_client_side(s_client)
-                sc = check_domain_client_side(sc)
+                loop = asyncio.get_event_loop()
+                # Run synchronous code in thread pool
+                sc = await loop.run_in_executor(None, identify_brand_client_side, s_client)
+                sc = await loop.run_in_executor(None, check_domain_client_side, sc)
                 return "client", sc
 
             async def server_pipeline():
-                ss = identify_brand_server_side(s_server)
-                ss = check_domain_server_side(ss)
+                loop = asyncio.get_event_loop()
+                # Run synchronous code in thread pool
+                ss = await loop.run_in_executor(None, identify_brand_server_side, s_server)
+                ss = await loop.run_in_executor(None, check_domain_server_side, ss)
                 return "server", ss
 
             client_task = asyncio.create_task(client_pipeline())
             server_task = asyncio.create_task(server_pipeline())
 
-            
+
             done, pending = await asyncio.wait(
                 {client_task, server_task},
                 return_when=asyncio.FIRST_COMPLETED,
